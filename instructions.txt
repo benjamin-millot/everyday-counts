@@ -1,0 +1,10 @@
+Create an application called Everday Counts in dart and flutter.
+
+- The application is an habit tracker. Each day, the user can select the habits they commited to during the day. the application follows the progress.
+- The user can enter new habits, add an icon to represent them and a description. An habit can be like "No smoking", "Physical activity", "No alcohol", etc...
+- The user can edit or remove an existing habit.
+- By clickin on a habit, the user can see statistics related to it (e.g streak, etc...)
+- A calendar is available for the user to see. It display medals gold/silver/bronze medals the days a certain number of habit have been validated. The medal shouild be awarded depending of the percentage of habits completed this days, with 100% for gold.
+- A global statistics page is also available.
+- The application main target is Android, but it should be compatible with iOS and web. Maitaining responsive design is a must.
+- For the Habit page, the Calendar page and the Statistics, use a NavigationBar.
