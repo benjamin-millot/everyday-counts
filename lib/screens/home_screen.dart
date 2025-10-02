@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/habit.dart';
 import '../models/habit_entry.dart';
 import '../database/database_helper.dart';
-import '../theme/color_extensions.dart';
+import '../widgets/modern_habit_card.dart';
 import 'add_edit_habit_screen.dart';
 import 'habit_statistics_screen.dart';
 
@@ -208,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Habits'),
+        title: const Text('Everyday Counts'),
       ),
       body: Column(
         children: [
@@ -359,111 +359,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           final habit = _habits[index];
                           final isCompleted = _habitCompletions[habit.id!] ?? false;
                           
-                          return Card(
-                            child: InkWell(
-                              onTap: () => _toggleHabitCompletion(habit.id!),
-                              borderRadius: BorderRadius.circular(12),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Container(
-                                          width: 50,
-                                          height: 50,
-                                          decoration: BoxDecoration(
-                                            color: isCompleted ? Theme.of(context).colorScheme.success : Theme.of(context).colorScheme.surfaceContainerHighest,
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                          child: Center(
-                                            child: Text(
-                                              habit.icon,
-                                              style: const TextStyle(fontSize: 24),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                habit.name,
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 16,
-                                                  decoration: isCompleted ? TextDecoration.lineThrough : null,
-                                                ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                              Text(
-                                                habit.description,
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  color: Colors.grey[600],
-                                                ),
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        PopupMenuButton<String>(
-                                          onSelected: (value) {
-                                            switch (value) {
-                                              case 'statistics':
-                                                _navigateToStatistics(habit);
-                                                break;
-                                              case 'edit':
-                                                _editHabit(habit);
-                                                break;
-                                              case 'delete':
-                                                _deleteHabit(habit);
-                                                break;
-                                            }
-                                          },
-                                          itemBuilder: (context) => [
-                                            const PopupMenuItem(
-                                              value: 'statistics',
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.analytics),
-                                                  SizedBox(width: 8),
-                                                  Text('Statistics'),
-                                                ],
-                                              ),
-                                            ),
-                                            const PopupMenuItem(
-                                              value: 'edit',
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.edit),
-                                                  SizedBox(width: 8),
-                                                  Text('Edit'),
-                                                ],
-                                              ),
-                                            ),
-                                            const PopupMenuItem(
-                                              value: 'delete',
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.delete),
-                                                  SizedBox(width: 8),
-                                                  Text('Delete'),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
+                          return ModernHabitCard(
+                            habit: habit,
+                            isCompleted: isCompleted,
+                            onToggleCompletion: () => _toggleHabitCompletion(habit.id!),
+                            onEdit: () => _editHabit(habit),
+                            onDelete: () => _deleteHabit(habit),
+                            onShowStatistics: () => _navigateToStatistics(habit),
                           );
                         },
                       )
@@ -474,53 +376,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           final habit = _habits[index];
                           final isCompleted = _habitCompletions[habit.id!] ?? false;
                           
-                          return Card(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            child: ListTile(
-                              leading: Container(
-                                width: 50,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: isCompleted ? Theme.of(context).colorScheme.success : Theme.of(context).colorScheme.surfaceContainerHighest,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    habit.icon,
-                                    style: const TextStyle(fontSize: 24),
-                                  ),
-                                ),
-                              ),
-                              title: Text(
-                                habit.name,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  decoration: isCompleted ? TextDecoration.lineThrough : null,
-                                ),
-                              ),
-                              subtitle: Text(habit.description),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    onPressed: () => _navigateToStatistics(habit),
-                                    icon: const Icon(Icons.analytics),
-                                    tooltip: 'Statistics',
-                                  ),
-                                  IconButton(
-                                    onPressed: () => _editHabit(habit),
-                                    icon: const Icon(Icons.edit),
-                                    tooltip: 'Edit',
-                                  ),
-                                  IconButton(
-                                    onPressed: () => _deleteHabit(habit),
-                                    icon: const Icon(Icons.delete),
-                                    tooltip: 'Delete',
-                                  ),
-                                ],
-                              ),
-                              onTap: () => _toggleHabitCompletion(habit.id!),
-                            ),
+                          return ModernHabitCard(
+                            habit: habit,
+                            isCompleted: isCompleted,
+                            onToggleCompletion: () => _toggleHabitCompletion(habit.id!),
+                            onEdit: () => _editHabit(habit),
+                            onDelete: () => _deleteHabit(habit),
+                            onShowStatistics: () => _navigateToStatistics(habit),
                           );
                         },
                       ),
