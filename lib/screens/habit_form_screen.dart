@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/habit.dart';
+import '../theme/app_colors.dart';
 
 class HabitFormScreen extends StatefulWidget {
   final Habit? habit;
@@ -49,9 +50,9 @@ class _HabitFormScreenState extends State<HabitFormScreen> {
       appBar: AppBar(
         title: Text(
           widget.habit == null ? 'Add New Habit' : 'Edit Habit',
-          style: const TextStyle(
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
-            fontSize: 20,
+            color: Colors.white,
           ),
         ),
         elevation: 0,
@@ -72,34 +73,31 @@ class _HabitFormScreenState extends State<HabitFormScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Header Section
+                    // Header Section - Modern and Clean
                     Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.primary.withValues(alpha: 0.8)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(20),
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.deepPurple.withValues(alpha: 0.3),
-                            blurRadius: 15,
-                            offset: const Offset(0, 8),
+                            color: AppColors.primary.withValues(alpha: 0.2),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
                       child: Column(
                         children: [
+                          // Icon Preview
                           Container(
                             width: 80,
                             height: 80,
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(20),
+                              color: Colors.white.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.3),
+                                color: Colors.white.withValues(alpha: 0.2),
                                 width: 2,
                               ),
                             ),
@@ -113,10 +111,9 @@ class _HabitFormScreenState extends State<HabitFormScreen> {
                           const SizedBox(height: 16),
                           Text(
                             widget.habit == null ? 'Create New Habit' : 'Update Habit',
-                            style: const TextStyle(
+                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                               color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -124,9 +121,8 @@ class _HabitFormScreenState extends State<HabitFormScreen> {
                             widget.habit == null 
                                 ? 'Choose an icon and fill in the details below'
                                 : 'Modify your habit details',
-                            style: TextStyle(
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: Colors.white.withValues(alpha: 0.9),
-                              fontSize: 16,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -134,21 +130,17 @@ class _HabitFormScreenState extends State<HabitFormScreen> {
                       ),
                     ),
                     
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
                     
-                    // Icon Selection
+                    // Icon Selection - Modern Grid
                     Container(
-                      padding: const EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withValues(alpha: 0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                        color: Theme.of(context).colorScheme.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                        ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,34 +150,32 @@ class _HabitFormScreenState extends State<HabitFormScreen> {
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: Colors.deepPurple[100],
-                                  borderRadius: BorderRadius.circular(12),
+                                  color: AppColors.primary.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Icon(
                                   Icons.emoji_emotions,
-                                  color: Colors.deepPurple[600],
-                                  size: 24,
+                                  color: AppColors.primary,
+                                  size: 20,
                                 ),
                               ),
                               const SizedBox(width: 12),
-                              const Text(
+                              Text(
                                 'Choose an Icon',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 16),
                           GridView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 6,
-                              crossAxisSpacing: 12,
-                              mainAxisSpacing: 12,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
                               childAspectRatio: 1,
                             ),
                             itemCount: _availableIcons.length,
@@ -205,29 +195,24 @@ class _HabitFormScreenState extends State<HabitFormScreen> {
                                   child: Container(
                                     decoration: BoxDecoration(
                                       color: isSelected 
-                                          ? Colors.deepPurple 
-                                          : Colors.grey[100],
-                                      borderRadius: BorderRadius.circular(16),
+                                          ? AppColors.primary
+                                          : Theme.of(context).colorScheme.surfaceContainerHighest,
+                                      borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
                                         color: isSelected 
-                                            ? Colors.deepPurple 
-                                            : Colors.grey[300]!,
-                                        width: isSelected ? 3 : 1,
+                                            ? AppColors.primary
+                                            : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                                        width: isSelected ? 2 : 1,
                                       ),
-                                      boxShadow: isSelected ? [
-                                        BoxShadow(
-                                          color: Colors.deepPurple.withValues(alpha: 0.3),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ] : null,
                                     ),
                                     child: Center(
                                       child: Text(
                                         icon,
                                         style: TextStyle(
-                                          fontSize: 24,
-                                          color: isSelected ? Colors.white : Colors.grey[700],
+                                          fontSize: 20,
+                                          color: isSelected 
+                                              ? Colors.white 
+                                              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                                         ),
                                       ),
                                     ),
@@ -240,21 +225,17 @@ class _HabitFormScreenState extends State<HabitFormScreen> {
                       ),
                     ),
                     
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
                     
-                    // Form Fields
+                    // Form Fields - Modern Input Design
                     Container(
-                      padding: const EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withValues(alpha: 0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                        color: Theme.of(context).colorScheme.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                        ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -264,55 +245,36 @@ class _HabitFormScreenState extends State<HabitFormScreen> {
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: Colors.blue[100],
-                                  borderRadius: BorderRadius.circular(12),
+                                  color: AppColors.info.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Icon(
                                   Icons.edit_note,
-                                  color: Colors.blue[600],
-                                  size: 24,
+                                  color: AppColors.info,
+                                  size: 20,
                                 ),
                               ),
                               const SizedBox(width: 12),
-                              const Text(
+                              Text(
                                 'Habit Details',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 20),
                           
                           // Name Field
                           TextFormField(
                             controller: _nameController,
-                            style: const TextStyle(fontSize: 16),
+                            style: Theme.of(context).textTheme.bodyLarge,
                             decoration: InputDecoration(
                               labelText: 'Habit Name',
                               hintText: 'e.g., No smoking, Exercise daily',
-                              labelStyle: TextStyle(color: Colors.grey[600]),
-                              hintStyle: TextStyle(color: Colors.grey[400]),
-                              prefixIcon: Icon(Icons.label_outline, color: Colors.grey[600]),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.grey[300]!),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.grey[300]!),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.deepPurple, width: 2),
-                              ),
-                              filled: true,
-                              fillColor: Colors.grey[50],
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 16,
+                              prefixIcon: Icon(
+                                Icons.label_outline,
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
                             ),
                             validator: (value) {
@@ -322,36 +284,19 @@ class _HabitFormScreenState extends State<HabitFormScreen> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 16),
                           
                           // Description Field
                           TextFormField(
                             controller: _descriptionController,
-                            style: const TextStyle(fontSize: 16),
+                            style: Theme.of(context).textTheme.bodyLarge,
                             maxLines: 3,
                             decoration: InputDecoration(
                               labelText: 'Description',
                               hintText: 'Describe your habit and why it\'s important to you',
-                              labelStyle: TextStyle(color: Colors.grey[600]),
-                              hintStyle: TextStyle(color: Colors.grey[400]),
-                              prefixIcon: Icon(Icons.description_outlined, color: Colors.grey[600]),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.grey[300]!),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.grey[300]!),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.deepPurple, width: 2),
-                              ),
-                              filled: true,
-                              fillColor: Colors.grey[50],
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 16,
+                              prefixIcon: Icon(
+                                Icons.description_outlined,
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
                             ),
                             validator: (value) {
@@ -365,33 +310,20 @@ class _HabitFormScreenState extends State<HabitFormScreen> {
                       ),
                     ),
                     
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
                     
-                    // Save Button
-                    Container(
+                    // Save Button - Modern Design
+                    SizedBox(
                       height: 56,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.primary.withValues(alpha: 0.8)],
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.deepPurple.withValues(alpha: 0.3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
-                      ),
                       child: ElevatedButton(
                         onPressed: _saveHabit,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          elevation: 2,
+                          shadowColor: AppColors.primary.withValues(alpha: 0.3),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
                         child: Row(
@@ -399,14 +331,12 @@ class _HabitFormScreenState extends State<HabitFormScreen> {
                           children: [
                             Icon(
                               widget.habit == null ? Icons.add_circle : Icons.save,
-                              color: Colors.white,
-                              size: 24,
+                              size: 20,
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: 8),
                             Text(
                               widget.habit == null ? 'Create Habit' : 'Update Habit',
-                              style: const TextStyle(
-                                fontSize: 18,
+                              style: Theme.of(context).textTheme.labelLarge?.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white,
                               ),
@@ -441,4 +371,3 @@ class _HabitFormScreenState extends State<HabitFormScreen> {
     }
   }
 }
-
