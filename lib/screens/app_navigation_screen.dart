@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import 'habits_screen.dart';
 import 'calendar_screen.dart';
-import 'global_statistics_screen.dart';
+import 'statistics_screen.dart';
 import 'settings_screen.dart';
 
-class MainNavigationScreen extends StatefulWidget {
-  const MainNavigationScreen({super.key});
+class AppNavigationScreen extends StatefulWidget {
+  const AppNavigationScreen({super.key});
 
   @override
-  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
+  State<AppNavigationScreen> createState() => _AppNavigationScreenState();
 }
 
-class _MainNavigationScreenState extends State<MainNavigationScreen> {
+class _AppNavigationScreenState extends State<AppNavigationScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
-    const HomeScreen(),
+    const HabitsScreen(),
     const CalendarScreen(),
-    const GlobalStatisticsScreen(),
+    const StatisticsScreen(),
     const SettingsScreen(),
   ];
 

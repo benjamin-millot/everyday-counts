@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import '../models/habit.dart';
 import '../models/habit_entry.dart';
-import '../database/database_helper.dart';
-import '../widgets/modern_habit_card.dart';
-import 'add_edit_habit_screen.dart';
-import 'habit_statistics_screen.dart';
+import '../database/habit_database_service.dart';
+import '../widgets/habit_card.dart';
+import 'habit_form_screen.dart';
+import 'habit_detail_screen.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class HabitsScreen extends StatefulWidget {
+  const HabitsScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<HabitsScreen> createState() => _HabitsScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  final DatabaseHelper _dbHelper = DatabaseHelper();
+class _HabitsScreenState extends State<HabitsScreen> {
+  final HabitDatabaseService _dbHelper = HabitDatabaseService();
   List<Habit> _habits = [];
   DateTime _selectedDate = DateTime.now();
   Map<int, bool> _habitCompletions = {};
@@ -111,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final result = await Navigator.push<Habit>(
         context,
-        MaterialPageRoute(builder: (context) => const AddEditHabitScreen()),
+        MaterialPageRoute(builder: (context) => const HabitFormScreen()),
       );
       
       if (result != null) {
@@ -135,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final result = await Navigator.push<Habit>(
         context,
         MaterialPageRoute(
-          builder: (context) => AddEditHabitScreen(habit: habit),
+          builder: (context) => HabitFormScreen(habit: habit),
         ),
       );
       
@@ -194,9 +194,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void _navigateToStatistics(Habit habit) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => HabitStatisticsScreen(habit: habit),
-      ),
+        MaterialPageRoute(
+          builder: (context) => HabitDetailScreen(habit: habit),
+        ),
     );
   }
 
@@ -359,7 +359,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           final habit = _habits[index];
                           final isCompleted = _habitCompletions[habit.id!] ?? false;
                           
-                          return ModernHabitCard(
+                          return HabitCard(
                             habit: habit,
                             isCompleted: isCompleted,
                             onToggleCompletion: () => _toggleHabitCompletion(habit.id!),
@@ -376,7 +376,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           final habit = _habits[index];
                           final isCompleted = _habitCompletions[habit.id!] ?? false;
                           
-                          return ModernHabitCard(
+                          return HabitCard(
                             habit: habit,
                             isCompleted: isCompleted,
                             onToggleCompletion: () => _toggleHabitCompletion(habit.id!),

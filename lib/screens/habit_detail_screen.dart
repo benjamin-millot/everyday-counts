@@ -2,20 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/habit.dart';
 import '../models/habit_entry.dart';
-import '../database/database_helper.dart';
+import '../database/habit_database_service.dart';
 import '../theme/color_extensions.dart';
 
-class HabitStatisticsScreen extends StatefulWidget {
+class HabitDetailScreen extends StatefulWidget {
   final Habit habit;
 
-  const HabitStatisticsScreen({super.key, required this.habit});
+  const HabitDetailScreen({super.key, required this.habit});
 
   @override
-  State<HabitStatisticsScreen> createState() => _HabitStatisticsScreenState();
+  State<HabitDetailScreen> createState() => _HabitDetailScreenState();
 }
 
-class _HabitStatisticsScreenState extends State<HabitStatisticsScreen> {
-  final DatabaseHelper _dbHelper = DatabaseHelper();
+class _HabitDetailScreenState extends State<HabitDetailScreen> {
+  final HabitDatabaseService _dbHelper = HabitDatabaseService();
   List<HabitEntry> _entries = [];
   int _currentStreak = 0;
   int _bestStreak = 0;

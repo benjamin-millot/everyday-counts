@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../database/database_helper.dart';
+import '../database/habit_database_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -9,7 +9,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  final DatabaseHelper _dbHelper = DatabaseHelper();
+  final HabitDatabaseService _dbHelper = HabitDatabaseService();
   bool _isResetting = false;
 
   Future<void> _resetAllData() async {

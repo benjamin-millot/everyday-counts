@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import '../models/habit.dart';
-import '../database/database_helper.dart';
+import '../database/habit_database_service.dart';
 import '../theme/color_extensions.dart';
 
-class GlobalStatisticsScreen extends StatefulWidget {
-  const GlobalStatisticsScreen({super.key});
+class StatisticsScreen extends StatefulWidget {
+  const StatisticsScreen({super.key});
 
   @override
-  State<GlobalStatisticsScreen> createState() => _GlobalStatisticsScreenState();
+  State<StatisticsScreen> createState() => _StatisticsScreenState();
 }
 
-class _GlobalStatisticsScreenState extends State<GlobalStatisticsScreen> {
-  final DatabaseHelper _dbHelper = DatabaseHelper();
+class _StatisticsScreenState extends State<StatisticsScreen> {
+  final HabitDatabaseService _dbHelper = HabitDatabaseService();
   List<Habit> _habits = [];
   int _totalHabits = 0;
   int _totalCompletions = 0;

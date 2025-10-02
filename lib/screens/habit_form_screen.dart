@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import '../models/habit.dart';
 
-class AddEditHabitScreen extends StatefulWidget {
+class HabitFormScreen extends StatefulWidget {
   final Habit? habit;
 
-  const AddEditHabitScreen({super.key, this.habit});
+  const HabitFormScreen({super.key, this.habit});
 
   @override
-  State<AddEditHabitScreen> createState() => _AddEditHabitScreenState();
+  State<HabitFormScreen> createState() => _HabitFormScreenState();
 }
 
-class _AddEditHabitScreenState extends State<AddEditHabitScreen> {
+class _HabitFormScreenState extends State<HabitFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
