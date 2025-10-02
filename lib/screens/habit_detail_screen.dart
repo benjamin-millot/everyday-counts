@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/habit.dart';
-import '../models/habit_entry.dart';
-import '../database/habit_database_service.dart';
+import '../providers/habit_data_provider.dart';
 import '../theme/color_extensions.dart';
 
 class HabitDetailScreen extends StatefulWidget {
@@ -15,352 +15,121 @@ class HabitDetailScreen extends StatefulWidget {
 }
 
 class _HabitDetailScreenState extends State<HabitDetailScreen> {
-  final HabitDatabaseService _dbHelper = HabitDatabaseService();
-  List<HabitEntry> _entries = [];
-  int _currentStreak = 0;
-  int _bestStreak = 0;
-  int _totalCompletions = 0;
-  double _completionRate30Days = 0.0;
-  double _completionRate7Days = 0.0;
-  double _completionRate90Days = 0.0;
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadStatistics();
-  }
-
-  Future<void> _loadStatistics() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final entries = await _dbHelper.getHabitEntries(widget.habit.id!);
-      final currentStreak = await _dbHelper.getStreak(widget.habit.id!);
-      final bestStreak = await _dbHelper.getBestStreak(widget.habit.id!);
-      final totalCompletions = await _dbHelper.getTotalCompletions(widget.habit.id!);
-      final completionRate30Days = await _dbHelper.getCompletionRate(widget.habit.id!, days: 30);
-      final completionRate7Days = await _dbHelper.getCompletionRate(widget.habit.id!, days: 7);
-      final completionRate90Days = await _dbHelper.getCompletionRate(widget.habit.id!, days: 90);
-      
-      setState(() {
-        _entries = entries;
-        _currentStreak = currentStreak;
-        _bestStreak = bestStreak;
-        _totalCompletions = totalCompletions;
-        _completionRate30Days = completionRate30Days;
-        _completionRate7Days = completionRate7Days;
-        _completionRate90Days = completionRate90Days;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error loading habit statistics: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 600;
-    final isLargeScreen = screenWidth > 900;
-    
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.habit.icon} ${widget.habit.name}'),
+        title: Text(widget.habit.name),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Center(
-              child: Container(
-                constraints: isLargeScreen ? const BoxConstraints(maxWidth: 800) : null,
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.all(isTablet ? 24 : 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                  // Habit Info Card
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 60,
-                                height: 60,
-                                decoration: BoxDecoration(
-                                  color: Colors.deepPurple[100],
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    widget.habit.icon,
-                                    style: const TextStyle(fontSize: 32),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      widget.habit.name,
-                                      style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      widget.habit.description,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Statistics Cards
-                  if (isTablet) ...[
-                    // Tablet layout - 3 columns
-                    Row(
+      body: Consumer<HabitDataProvider>(
+        builder: (context, habitProvider, child) {
+          final currentStreak = habitProvider.getStreak(widget.habit.id!);
+          final completionRate = habitProvider.getCompletionRate(widget.habit.id!);
+          
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Habit Header
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
                       children: [
-                        Expanded(
-                          child: _buildStatCard(
-                            'Current Streak',
-                            '$_currentStreak days',
-                            Icons.local_fire_department,
-                            Theme.of(context).colorScheme.statsOrange,
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Center(
+                            child: Text(
+                              widget.habit.icon,
+                              style: const TextStyle(fontSize: 32),
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 16),
                         Expanded(
-                          child: _buildStatCard(
-                            'Best Streak',
-                            '$_bestStreak days',
-                            Icons.emoji_events,
-                            Theme.of(context).colorScheme.statsAmber,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _buildStatCard(
-                            'Total Completions',
-                            '$_totalCompletions',
-                            Icons.check_circle,
-                            Theme.of(context).colorScheme.statsGreen,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildStatCard(
-                            '7-Day Rate',
-                            '${_completionRate7Days.toStringAsFixed(1)}%',
-                            Icons.trending_up,
-                            Theme.of(context).colorScheme.statsBlue,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _buildStatCard(
-                            '30-Day Rate',
-                            '${_completionRate30Days.toStringAsFixed(1)}%',
-                            Icons.analytics,
-                            Theme.of(context).colorScheme.statsPurple,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _buildStatCard(
-                            '90-Day Rate',
-                            '${_completionRate90Days.toStringAsFixed(1)}%',
-                            Icons.timeline,
-                            Theme.of(context).colorScheme.statsTeal,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ] else ...[
-                    // Mobile layout - 2 columns
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildStatCard(
-                            'Current Streak',
-                            '$_currentStreak days',
-                            Icons.local_fire_department,
-                            Theme.of(context).colorScheme.statsOrange,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _buildStatCard(
-                            'Best Streak',
-                            '$_bestStreak days',
-                            Icons.emoji_events,
-                            Theme.of(context).colorScheme.statsAmber,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildStatCard(
-                            'Total Completions',
-                            '$_totalCompletions',
-                            Icons.check_circle,
-                            Theme.of(context).colorScheme.statsGreen,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _buildStatCard(
-                            '7-Day Rate',
-                            '${_completionRate7Days.toStringAsFixed(1)}%',
-                            Icons.trending_up,
-                            Theme.of(context).colorScheme.statsBlue,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildStatCard(
-                            '30-Day Rate',
-                            '${_completionRate30Days.toStringAsFixed(1)}%',
-                            Icons.analytics,
-                            Theme.of(context).colorScheme.statsPurple,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _buildStatCard(
-                            '90-Day Rate',
-                            '${_completionRate90Days.toStringAsFixed(1)}%',
-                            Icons.timeline,
-                            Theme.of(context).colorScheme.statsTeal,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Recent Activity
-                  const Text(
-                    'Recent Activity',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  
-                  if (_entries.isEmpty)
-                    const Card(
-                      child: Padding(
-                        padding: EdgeInsets.all(32),
-                        child: Center(
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(
-                                Icons.history,
-                                size: 48,
-                                color: Colors.grey,
-                              ),
-                              SizedBox(height: 16),
                               Text(
-                                'No activity yet',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey,
+                                widget.habit.name,
+                                style: Theme.of(context).textTheme.headlineSmall,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                widget.habit.description,
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ),
-                    )
-                  else
-                    Card(
-                      child: Column(
-                        children: _entries.take(10).map((entry) {
-                          return ListTile(
-                            leading: Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: entry.completed ? Colors.green : Colors.grey[300],
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Icon(
-                                entry.completed ? Icons.check : Icons.close,
-                                color: entry.completed ? Colors.white : Colors.grey[600],
-                              ),
-                            ),
-                            title: Text(
-                              DateFormat('MMM dd, yyyy').format(entry.date),
-                              style: TextStyle(
-                                fontWeight: entry.completed ? FontWeight.bold : FontWeight.normal,
-                              ),
-                            ),
-                            subtitle: Text(
-                              entry.completed ? 'Completed' : 'Not completed',
-                              style: TextStyle(
-                                color: entry.completed ? Colors.green : Colors.grey[600],
-                              ),
-                            ),
-                            trailing: entry.completed
-                                ? const Icon(Icons.check_circle, color: Colors.green)
-                                : const Icon(Icons.cancel, color: Colors.grey),
-                          );
-                        }).toList(),
-                      ),
+                      ],
                     ),
-                    ],
                   ),
                 ),
-              ),
+                
+                const SizedBox(height: 16),
+                
+                // Statistics Cards
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildStatCard(
+                        context,
+                        'Current Streak',
+                        currentStreak.toString(),
+                        Icons.local_fire_department,
+                        Theme.of(context).colorScheme.statsRed,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildStatCard(
+                        context,
+                        'Completion Rate',
+                        '${completionRate.toStringAsFixed(1)}%',
+                        Icons.trending_up,
+                        Theme.of(context).colorScheme.statsGreen,
+                      ),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Recent Activity
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Recent Activity',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildRecentActivityList(context, habitProvider),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(BuildContext context, String title, String value, IconData icon, Color color) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -370,30 +139,82 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
             const SizedBox(height: 8),
             Text(
               value,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 color: color,
+                fontWeight: FontWeight.bold,
               ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
             ),
-            const SizedBox(height: 4),
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 2,
             ),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildRecentActivityList(BuildContext context, HabitDataProvider habitProvider) {
+    final today = DateTime.now();
+    final recentDays = List.generate(7, (index) => 
+      today.subtract(Duration(days: index))
+    );
+    
+    return Column(
+      children: recentDays.map((date) {
+        final isCompleted = habitProvider.isHabitCompleted(widget.habit.id!, date);
+        final isToday = date.day == today.day && date.month == today.month && date.year == today.year;
+        
+        return ListTile(
+          leading: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: isCompleted 
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.surfaceContainerHighest,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: isCompleted
+                  ? Icon(
+                      Icons.check,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      size: 20,
+                    )
+                  : Icon(
+                      Icons.close,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      size: 20,
+                    ),
+            ),
+          ),
+          title: Text(
+            isToday ? 'Today' : DateFormat('EEEE, MMM d').format(date),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          subtitle: Text(
+            isCompleted ? 'Completed' : 'Not completed',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: isCompleted 
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          trailing: isCompleted
+              ? Icon(
+                  Icons.check_circle,
+                  color: Theme.of(context).colorScheme.primary,
+                )
+              : Icon(
+                  Icons.radio_button_unchecked,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+        );
+      }).toList(),
+    );
+  }
 }
-
-

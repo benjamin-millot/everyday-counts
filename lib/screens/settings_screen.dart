@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../database/habit_database_service.dart';
+import 'package:provider/provider.dart';
+import '../providers/habit_data_provider.dart';
+import '../theme/color_extensions.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -9,9 +11,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  final HabitDatabaseService _dbHelper = HabitDatabaseService();
-  bool _isResetting = false;
-
   Future<void> _resetAllData() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -37,18 +36,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
 
     if (confirmed == true) {
-      setState(() {
-        _isResetting = true;
-      });
-
       try {
-        await _dbHelper.resetAllData();
+        final habitProvider = Provider.of<HabitDataProvider>(context, listen: false);
+        await habitProvider.resetAllData();
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('All data has been reset successfully'),
-              backgroundColor: Colors.green,
+            SnackBar(
+              content: const Text('All data has been reset successfully'),
+              backgroundColor: Theme.of(context).colorScheme.success,
             ),
           );
         }
@@ -57,15 +53,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error resetting data: $e'),
-              backgroundColor: Colors.red,
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
-        }
-      } finally {
-        if (mounted) {
-          setState(() {
-            _isResetting = false;
-          });
         }
       }
     }
@@ -73,33 +63,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 600;
-    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
       ),
-      body: Center(
-        child: Container(
-          constraints: isTablet ? const BoxConstraints(maxWidth: 600) : null,
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
+      body: Consumer<HabitDataProvider>(
+        builder: (context, habitProvider, child) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                
-                // Settings Options
+                // Data Management
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withValues(alpha: 0.1),
+                        color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.1),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -113,132 +96,60 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Colors.red[100],
+                              color: Theme.of(context).colorScheme.errorContainer,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
                               Icons.warning_amber,
-                              color: Colors.red[600],
+                              color: Theme.of(context).colorScheme.error,
                               size: 24,
                             ),
                           ),
                           const SizedBox(width: 12),
-                          const Text(
+                          Text(
                             'Data Management',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
+                            style: Theme.of(context).textTheme.headlineSmall,
                           ),
                         ],
                       ),
                       const SizedBox(height: 20),
-                      
-                      // Reset Data Section
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.red[50],
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.red[200]!,
-                            width: 1,
+                      ElevatedButton.icon(
+                        onPressed: habitProvider.isLoading ? null : _resetAllData,
+                        icon: habitProvider.isLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.delete_forever),
+                        label: Text(habitProvider.isLoading ? 'Resetting...' : 'Reset All Data'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.error,
+                          foregroundColor: Theme.of(context).colorScheme.onError,
+                          minimumSize: const Size.fromHeight(50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.delete_forever,
-                                  color: Colors.red[600],
-                                  size: 24,
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Reset All Data',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.red[700],
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Delete all habits and completion history',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.red[600],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed: _isResetting ? null : _resetAllData,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red[600],
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                child: _isResetting
-                                    ? const Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                            ),
-                                          ),
-                                          SizedBox(width: 12),
-                                          Text('Resetting...'),
-                                        ],
-                                      )
-                                    : const Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(Icons.delete_forever),
-                                          SizedBox(width: 8),
-                                          Text('Reset All Data'),
-                                        ],
-                                      ),
-                              ),
-                            ),
-                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // App Information
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withValues(alpha: 0.1),
+                        color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.1),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -252,68 +163,60 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Colors.blue[100],
+                              color: Theme.of(context).colorScheme.primaryContainer,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
-                              Icons.info,
-                              color: Colors.blue[600],
+                              Icons.info_outline,
+                              color: Theme.of(context).colorScheme.primary,
                               size: 24,
                             ),
                           ),
                           const SizedBox(width: 12),
-                          const Text(
+                          Text(
                             'App Information',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
+                            style: Theme.of(context).textTheme.headlineSmall,
                           ),
                         ],
                       ),
                       const SizedBox(height: 20),
-                      
-                      _buildInfoRow('App Name', 'Everday Counts'),
-                      const Divider(),
-                      _buildInfoRow('Version', '1.0.0'),
-                      const Divider(),
-                      _buildInfoRow('Platform', 'Flutter'),
-                      const Divider(),
-                      _buildInfoRow('Target', 'Android, iOS, Web'),
+                      ListTile(
+                        title: Text(
+                          'Version',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        trailing: Text(
+                          '1.0.0',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ),
+                      ListTile(
+                        title: Text(
+                          'Total Habits',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        trailing: Text(
+                          '${habitProvider.habits.length}',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ),
+                      ListTile(
+                        title: Text(
+                          'Active Streaks',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        trailing: Text(
+                          '${habitProvider.streaks.values.where((streak) => streak > 0).length}',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-            ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }

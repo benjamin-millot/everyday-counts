@@ -211,9 +211,9 @@ class HabitDatabaseService {
     
     if (totalHabits == 0) return 0.0;
     
-    // Get completed habits for this date
+    // Get unique completed habits for this date
     final completedResult = await db.rawQuery('''
-      SELECT COUNT(*) as count
+      SELECT COUNT(DISTINCT habit_id) as count
       FROM habit_entries
       WHERE date >= ? AND date < ? AND completed = 1
     ''', [startOfDay.millisecondsSinceEpoch, endOfDay.millisecondsSinceEpoch]);

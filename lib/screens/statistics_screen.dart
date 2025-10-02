@@ -1,424 +1,181 @@
 import 'package:flutter/material.dart';
-import '../models/habit.dart';
-import '../database/habit_database_service.dart';
+import 'package:provider/provider.dart';
+import '../providers/habit_data_provider.dart';
 import '../theme/color_extensions.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
 
   @override
-  State<StatisticsScreen> createState() => _StatisticsScreenState();
+  State<StatisticsScreen> createState() => StatisticsScreenState();
 }
 
-class _StatisticsScreenState extends State<StatisticsScreen> {
-  final HabitDatabaseService _dbHelper = HabitDatabaseService();
-  List<Habit> _habits = [];
-  int _totalHabits = 0;
-  int _totalCompletions = 0;
-  int _totalCompletionsToday = 0;
-  int _totalCompletionsThisWeek = 0;
-  int _totalCompletionsThisMonth = 0;
-  double _overallCompletionRate = 0.0;
-  bool _isLoading = true;
-
+class StatisticsScreenState extends State<StatisticsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadGlobalStatistics();
   }
 
-  Future<void> _loadGlobalStatistics() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final habits = await _dbHelper.getAllHabits();
-      final totalHabits = await _dbHelper.getTotalHabitsCount();
-      
-      int totalCompletions = 0;
-      int totalCompletionsToday = 0;
-      int totalCompletionsThisWeek = 0;
-      int totalCompletionsThisMonth = 0;
-      
-      final today = DateTime.now();
-      final startOfWeek = today.subtract(Duration(days: today.weekday - 1));
-      final startOfMonth = DateTime(today.year, today.month, 1);
-      
-      for (final habit in habits) {
-        final entries = await _dbHelper.getHabitEntries(habit.id!);
-        
-        for (final entry in entries) {
-          if (entry.completed) {
-            totalCompletions++;
-            
-            if (isSameDay(entry.date, today)) {
-              totalCompletionsToday++;
-            }
-            
-            if (entry.date.isAfter(startOfWeek.subtract(const Duration(days: 1)))) {
-              totalCompletionsThisWeek++;
-            }
-            
-            if (entry.date.isAfter(startOfMonth.subtract(const Duration(days: 1)))) {
-              totalCompletionsThisMonth++;
-            }
-          }
-        }
-      }
-      
-      // Calculate overall completion rate (last 30 days)
-      final startOf30Days = today.subtract(const Duration(days: 30));
-      int totalPossibleCompletions = 0;
-      int actualCompletions = 0;
-      
-      for (final habit in habits) {
-        for (int i = 0; i < 30; i++) {
-          final date = startOf30Days.add(Duration(days: i));
-          totalPossibleCompletions++;
-          
-          final entry = await _dbHelper.getHabitEntry(habit.id!, date);
-          if (entry != null && entry.completed) {
-            actualCompletions++;
-          }
-        }
-      }
-      
-      final overallCompletionRate = totalPossibleCompletions > 0 
-          ? (actualCompletions / totalPossibleCompletions) * 100 
-          : 0.0;
-
-      setState(() {
-        _habits = habits;
-        _totalHabits = totalHabits;
-        _totalCompletions = totalCompletions;
-        _totalCompletionsToday = totalCompletionsToday;
-        _totalCompletionsThisWeek = totalCompletionsThisWeek;
-        _totalCompletionsThisMonth = totalCompletionsThisMonth;
-        _overallCompletionRate = overallCompletionRate;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error loading statistics: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    }
-  }
-
-  bool isSameDay(DateTime date1, DateTime date2) {
-    return date1.year == date2.year &&
-           date1.month == date2.month &&
-           date1.day == date2.day;
+  // Method to refresh statistics data (can be called from parent)
+  void refreshStatisticsData() {
+    // Data is automatically refreshed through the provider
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 600;
-    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Statistics'),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Center(
-              child: Container(
-                constraints: isTablet ? const BoxConstraints(maxWidth: 800) : null,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                  // Overview Cards
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildStatCard(
-                          'Total Habits',
-                          '$_totalHabits',
-                          Icons.list_alt,
-                          Theme.of(context).colorScheme.statsBlue,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _buildStatCard(
-                          'Total Completions',
-                          '$_totalCompletions',
-                          Icons.check_circle,
-                          Theme.of(context).colorScheme.statsGreen,
-                        ),
-                      ),
-                    ],
+      body: Consumer<HabitDataProvider>(
+        builder: (context, habitProvider, child) {
+          if (habitProvider.isLoading) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          if (habitProvider.habits.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.analytics,
+                    size: 64,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                  
-                  const SizedBox(height: 8),
-                  
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildStatCard(
-                          'Today',
-                          '$_totalCompletionsToday',
-                          Icons.today,
-                          Theme.of(context).colorScheme.statsOrange,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _buildStatCard(
-                          'This Week',
-                          '$_totalCompletionsThisWeek',
-                          Icons.date_range,
-                          Theme.of(context).colorScheme.statsPurple,
-                        ),
-                      ),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 8),
-                  
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildStatCard(
-                          'This Month',
-                          '$_totalCompletionsThisMonth',
-                          Icons.calendar_month,
-                          Theme.of(context).colorScheme.statsTeal,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _buildStatCard(
-                          'Success Rate',
-                          '${_overallCompletionRate.toStringAsFixed(1)}%',
-                          Icons.trending_up,
-                          Theme.of(context).colorScheme.statsRed,
-                        ),
-                      ),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Progress Overview
-                  const Text(
-                    'Progress Overview',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No statistics available',
+                    style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 8),
-                  
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          _buildProgressBar(
-                            'Today\'s Progress',
-                            _totalCompletionsToday,
-                            _totalHabits,
-                            Theme.of(context).colorScheme.statsOrange,
-                          ),
-                          const SizedBox(height: 16),
-                          _buildProgressBar(
-                            'This Week\'s Progress',
-                            _totalCompletionsThisWeek,
-                            _totalHabits * 7,
-                            Theme.of(context).colorScheme.statsPurple,
-                          ),
-                          const SizedBox(height: 16),
-                          _buildProgressBar(
-                            'This Month\'s Progress',
-                            _totalCompletionsThisMonth,
-                            _totalHabits * 30,
-                            Theme.of(context).colorScheme.statsTeal,
-                          ),
-                        ],
-                      ),
+                  Text(
+                    'Add some habits to see your progress!',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Habit Performance
-                  const Text(
-                    'Habit Performance',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  
-                  if (_habits.isEmpty)
-                    const Card(
-                      child: Padding(
-                        padding: EdgeInsets.all(32),
-                        child: Center(
-                          child: Column(
-                            children: [
-                              Icon(
-                                Icons.analytics,
-                                size: 48,
-                                color: Colors.grey,
-                              ),
-                              SizedBox(height: 16),
-                              Text(
-                                'No habits to analyze',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    )
-                  else
-                    Card(
-                      child: Column(
-                        children: _habits.map((habit) {
-                          return FutureBuilder<double>(
-                            future: _dbHelper.getCompletionRate(habit.id!, days: 30),
-                            builder: (context, snapshot) {
-                              final completionRate = snapshot.data ?? 0.0;
-                              return ListTile(
-                                leading: Container(
-                                  width: 50,
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    color: Colors.deepPurple[100],
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      habit.icon,
-                                      style: const TextStyle(fontSize: 24),
-                                    ),
-                                  ),
-                                ),
-                                title: Text(
-                                  habit.name,
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                subtitle: Text(habit.description),
-                                trailing: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      '${completionRate.toStringAsFixed(1)}%',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: _getCompletionRateColor(completionRate),
-                                      ),
-                                    ),
-                                    Text(
-                                      '30 days',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Achievement Summary
-                  const Text(
-                    'Achievement Summary',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          _buildAchievementRow(
-                            'Perfect Day',
-                            'Complete all habits in one day',
-                            _totalCompletionsToday == _totalHabits && _totalHabits > 0,
-                          ),
-                          const Divider(),
-                          _buildAchievementRow(
-                            'Consistent Week',
-                            'Complete at least 70% of habits this week',
-                            _totalCompletionsThisWeek >= (_totalHabits * 7 * 0.7),
-                          ),
-                          const Divider(),
-                          _buildAchievementRow(
-                            'Monthly Master',
-                            'Complete at least 80% of habits this month',
-                            _totalCompletionsThisMonth >= (_totalHabits * 30 * 0.8),
-                          ),
-                        ],
-                      ),
-                    ),
-                    ),
-                  ],
-                ),
+                ],
               ),
+            );
+          }
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Overall Statistics
+                _buildOverallStatsCard(context, habitProvider),
+                const SizedBox(height: 16),
+                
+                // Individual Habit Statistics
+                _buildIndividualHabitsCard(context, habitProvider),
+                const SizedBox(height: 16),
+                
+                // Completion Trends
+                _buildCompletionTrendsCard(context, habitProvider),
+              ],
             ),
-          ),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildOverallStatsCard(BuildContext context, HabitDataProvider habitProvider) {
+    final totalHabits = habitProvider.habits.length;
+    final today = DateTime.now();
+    final todayCompletions = habitProvider.habits.where((habit) => 
+      habitProvider.isHabitCompleted(habit.id!, today)
+    ).length;
+    final overallCompletionRate = totalHabits > 0 ? (todayCompletions / totalHabits) * 100 : 0.0;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: color, size: 32),
-            const SizedBox(height: 8),
             Text(
-              value,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
+              'Overall Statistics',
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
-            const SizedBox(height: 4),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
-              ),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 2,
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildStatItem(
+                    context,
+                    'Total Habits',
+                    totalHabits.toString(),
+                    Icons.list_alt,
+                    Theme.of(context).colorScheme.statsBlue,
+                  ),
+                ),
+                Expanded(
+                  child: _buildStatItem(
+                    context,
+                    'Completed Today',
+                    todayCompletions.toString(),
+                    Icons.check_circle,
+                    Theme.of(context).colorScheme.statsGreen,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildStatItem(
+                    context,
+                    'Completion Rate',
+                    '${overallCompletionRate.toStringAsFixed(1)}%',
+                    Icons.trending_up,
+                    Theme.of(context).colorScheme.statsOrange,
+                  ),
+                ),
+                Expanded(
+                  child: _buildStatItem(
+                    context,
+                    'Active Streaks',
+                    habitProvider.streaks.values.where((streak) => streak > 0).length.toString(),
+                    Icons.local_fire_department,
+                    Theme.of(context).colorScheme.statsRed,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildStatItem(
+                    context,
+                    'Current Streak',
+                    habitProvider.streaks.values.isNotEmpty 
+                        ? habitProvider.streaks.values.reduce((a, b) => a > b ? a : b).toString()
+                        : '0',
+                    Icons.local_fire_department,
+                    Theme.of(context).colorScheme.statsAmber,
+                  ),
+                ),
+                Expanded(
+                  child: _buildStatItem(
+                    context,
+                    'Max Streak',
+                    habitProvider.bestStreaks.values.isNotEmpty 
+                        ? habitProvider.bestStreaks.values.reduce((a, b) => a > b ? a : b).toString()
+                        : '0',
+                    Icons.emoji_events,
+                    Theme.of(context).colorScheme.statsPurple,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -426,80 +183,232 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     );
   }
 
-  Widget _buildAchievementRow(String title, String description, bool achieved) {
-    return Row(
-      children: [
-        Icon(
-          achieved ? Icons.check_circle : Icons.radio_button_unchecked,
-          color: achieved ? Colors.green : Colors.grey,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: achieved ? Colors.green : Colors.grey[700],
+  Widget _buildIndividualHabitsCard(BuildContext context, HabitDataProvider habitProvider) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Individual Habit Progress',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 16),
+            ...habitProvider.habits.map((habit) {
+              final streak = habitProvider.getStreak(habit.id!);
+              final bestStreak = habitProvider.getBestStreak(habit.id!);
+              final completionRate = habitProvider.getCompletionRate(habit.id!);
+              
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  children: [
+                    Text(
+                      habit.icon,
+                      style: const TextStyle(fontSize: 24),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            habit.name,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          Text(
+                            '${completionRate.toStringAsFixed(1)}% completion rate',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (streak > 0 || bestStreak > 0)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (streak > 0)
+                            Container(
+                              margin: const EdgeInsets.only(right: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.local_fire_department,
+                                    size: 16,
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '$streak',
+                                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          if (bestStreak > 0)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.3),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.emoji_events,
+                                    size: 16,
+                                    color: Theme.of(context).colorScheme.secondary,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '$bestStreak',
+                                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                      color: Theme.of(context).colorScheme.secondary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                  ],
                 ),
-              ),
-              Text(
-                description,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
-          ),
+              );
+            }),
+          ],
         ),
-      ],
+      ),
     );
   }
 
-  Color _getCompletionRateColor(double rate) {
-    if (rate >= 80) return Colors.green;
-    if (rate >= 60) return Colors.orange;
-    if (rate >= 40) return Colors.amber;
-    return Colors.red;
-  }
-
-  Widget _buildProgressBar(String title, int completed, int total, Color color) {
-    final percentage = total > 0 ? (completed / total) * 100 : 0.0;
+  Widget _buildCompletionTrendsCard(BuildContext context, HabitDataProvider habitProvider) {
+    final today = DateTime.now();
+    final weekDays = List.generate(7, (index) {
+      final date = today.subtract(Duration(days: 6 - index));
+      return DateTime(date.year, date.month, date.day); // Normalize to start of day
+    });
     
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              title,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+              'Weekly Completion Trend',
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
-            Text(
-              '$completed / $total (${percentage.toStringAsFixed(1)}%)',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w500,
-              ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: weekDays.map((date) {
+                final percentage = habitProvider.getDailyCompletionPercentage(date);
+                final dayName = _getDayName(date.weekday);
+                
+                return Column(
+                  children: [
+                    Text(
+                      dayName,
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: 40,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Container(
+                            height: (percentage / 100) * 60,
+                            decoration: BoxDecoration(
+                              color: _getCompletionColor(percentage),
+                              borderRadius: const BorderRadius.only(
+                                bottomLeft: Radius.circular(8),
+                                bottomRight: Radius.circular(8),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${percentage.toStringAsFixed(0)}%',
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ],
+                );
+              }).toList(),
             ),
           ],
         ),
-        const SizedBox(height: 8),
-        LinearProgressIndicator(
-          value: total > 0 ? completed / total : 0.0,
-          backgroundColor: Colors.grey[200],
-          valueColor: AlwaysStoppedAnimation<Color>(color),
-          minHeight: 8,
-        ),
-      ],
+      ),
     );
+  }
+
+  Widget _buildStatItem(BuildContext context, String label, String value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getDayName(int weekday) {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return days[weekday - 1];
+  }
+
+  Color _getCompletionColor(double percentage) {
+    if (percentage >= 100) {
+      return Theme.of(context).colorScheme.statsGreen;
+    } else if (percentage >= 75) {
+      return Theme.of(context).colorScheme.statsOrange;
+    } else if (percentage >= 50) {
+      return Theme.of(context).colorScheme.statsAmber;
+    } else {
+      return Theme.of(context).colorScheme.statsRed;
+    }
   }
 }
