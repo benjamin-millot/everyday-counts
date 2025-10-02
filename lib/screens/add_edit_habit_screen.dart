@@ -86,7 +86,7 @@ class _AddEditHabitScreenState extends State<AddEditHabitScreen> {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.deepPurple.withOpacity(0.3),
+                            color: Colors.deepPurple.withValues(alpha: 0.3),
                             blurRadius: 15,
                             offset: const Offset(0, 8),
                           ),
@@ -98,10 +98,10 @@ class _AddEditHabitScreenState extends State<AddEditHabitScreen> {
                             width: 80,
                             height: 80,
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: Colors.white.withOpacity(0.3),
+                                color: Colors.white.withValues(alpha: 0.3),
                                 width: 2,
                               ),
                             ),
@@ -127,7 +127,7 @@ class _AddEditHabitScreenState extends State<AddEditHabitScreen> {
                                 ? 'Choose an icon and fill in the details below'
                                 : 'Modify your habit details',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                               fontSize: 16,
                             ),
                             textAlign: TextAlign.center,
@@ -146,7 +146,7 @@ class _AddEditHabitScreenState extends State<AddEditHabitScreen> {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.grey.withOpacity(0.1),
+                            color: Colors.grey.withValues(alpha: 0.1),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -218,7 +218,7 @@ class _AddEditHabitScreenState extends State<AddEditHabitScreen> {
                                       ),
                                       boxShadow: isSelected ? [
                                         BoxShadow(
-                                          color: Colors.deepPurple.withOpacity(0.3),
+                                          color: Colors.deepPurple.withValues(alpha: 0.3),
                                           blurRadius: 8,
                                           offset: const Offset(0, 4),
                                         ),
@@ -252,7 +252,7 @@ class _AddEditHabitScreenState extends State<AddEditHabitScreen> {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.grey.withOpacity(0.1),
+                            color: Colors.grey.withValues(alpha: 0.1),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -381,7 +381,7 @@ class _AddEditHabitScreenState extends State<AddEditHabitScreen> {
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.deepPurple.withOpacity(0.3),
+                            color: Colors.deepPurple.withValues(alpha: 0.3),
                             blurRadius: 12,
                             offset: const Offset(0, 6),
                           ),
