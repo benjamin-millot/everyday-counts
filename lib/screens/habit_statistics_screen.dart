@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../models/habit.dart';
 import '../models/habit_entry.dart';
 import '../database/database_helper.dart';
+import '../theme/color_extensions.dart';
 
 class HabitStatisticsScreen extends StatefulWidget {
   final Habit habit;
@@ -58,6 +59,15 @@ class _HabitStatisticsScreenState extends State<HabitStatisticsScreen> {
       setState(() {
         _isLoading = false;
       });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading habit statistics: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
     }
   }
 
@@ -70,8 +80,6 @@ class _HabitStatisticsScreenState extends State<HabitStatisticsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('${widget.habit.icon} ${widget.habit.name}'),
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -148,7 +156,7 @@ class _HabitStatisticsScreenState extends State<HabitStatisticsScreen> {
                             'Current Streak',
                             '$_currentStreak days',
                             Icons.local_fire_department,
-                            Colors.orange,
+                            Theme.of(context).colorScheme.statsOrange,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -157,7 +165,7 @@ class _HabitStatisticsScreenState extends State<HabitStatisticsScreen> {
                             'Best Streak',
                             '$_bestStreak days',
                             Icons.emoji_events,
-                            Colors.amber,
+                            Theme.of(context).colorScheme.statsAmber,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -166,7 +174,7 @@ class _HabitStatisticsScreenState extends State<HabitStatisticsScreen> {
                             'Total Completions',
                             '$_totalCompletions',
                             Icons.check_circle,
-                            Colors.green,
+                            Theme.of(context).colorScheme.statsGreen,
                           ),
                         ),
                       ],
@@ -179,7 +187,7 @@ class _HabitStatisticsScreenState extends State<HabitStatisticsScreen> {
                             '7-Day Rate',
                             '${_completionRate7Days.toStringAsFixed(1)}%',
                             Icons.trending_up,
-                            Colors.blue,
+                            Theme.of(context).colorScheme.statsBlue,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -188,7 +196,7 @@ class _HabitStatisticsScreenState extends State<HabitStatisticsScreen> {
                             '30-Day Rate',
                             '${_completionRate30Days.toStringAsFixed(1)}%',
                             Icons.analytics,
-                            Colors.purple,
+                            Theme.of(context).colorScheme.statsPurple,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -197,7 +205,7 @@ class _HabitStatisticsScreenState extends State<HabitStatisticsScreen> {
                             '90-Day Rate',
                             '${_completionRate90Days.toStringAsFixed(1)}%',
                             Icons.timeline,
-                            Colors.teal,
+                            Theme.of(context).colorScheme.statsTeal,
                           ),
                         ),
                       ],
@@ -211,7 +219,7 @@ class _HabitStatisticsScreenState extends State<HabitStatisticsScreen> {
                             'Current Streak',
                             '$_currentStreak days',
                             Icons.local_fire_department,
-                            Colors.orange,
+                            Theme.of(context).colorScheme.statsOrange,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -220,7 +228,7 @@ class _HabitStatisticsScreenState extends State<HabitStatisticsScreen> {
                             'Best Streak',
                             '$_bestStreak days',
                             Icons.emoji_events,
-                            Colors.amber,
+                            Theme.of(context).colorScheme.statsAmber,
                           ),
                         ),
                       ],
@@ -233,7 +241,7 @@ class _HabitStatisticsScreenState extends State<HabitStatisticsScreen> {
                             'Total Completions',
                             '$_totalCompletions',
                             Icons.check_circle,
-                            Colors.green,
+                            Theme.of(context).colorScheme.statsGreen,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -242,7 +250,7 @@ class _HabitStatisticsScreenState extends State<HabitStatisticsScreen> {
                             '7-Day Rate',
                             '${_completionRate7Days.toStringAsFixed(1)}%',
                             Icons.trending_up,
-                            Colors.blue,
+                            Theme.of(context).colorScheme.statsBlue,
                           ),
                         ),
                       ],
@@ -255,7 +263,7 @@ class _HabitStatisticsScreenState extends State<HabitStatisticsScreen> {
                             '30-Day Rate',
                             '${_completionRate30Days.toStringAsFixed(1)}%',
                             Icons.analytics,
-                            Colors.purple,
+                            Theme.of(context).colorScheme.statsPurple,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -264,7 +272,7 @@ class _HabitStatisticsScreenState extends State<HabitStatisticsScreen> {
                             '90-Day Rate',
                             '${_completionRate90Days.toStringAsFixed(1)}%',
                             Icons.timeline,
-                            Colors.teal,
+                            Theme.of(context).colorScheme.statsTeal,
                           ),
                         ),
                       ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/habit.dart';
 import '../models/habit_entry.dart';
 import '../database/database_helper.dart';
+import '../theme/color_extensions.dart';
 import 'add_edit_habit_screen.dart';
 import 'habit_statistics_screen.dart';
 
@@ -25,70 +26,132 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadHabits() async {
-    final habits = await _dbHelper.getAllHabits();
-    setState(() {
-      _habits = habits;
-    });
-    _loadHabitCompletions();
+    try {
+      final habits = await _dbHelper.getAllHabits();
+      setState(() {
+        _habits = habits;
+      });
+      _loadHabitCompletions();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading habits: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _loadHabitCompletions() async {
-    final completions = <int, bool>{};
-    for (final habit in _habits) {
-      final entry = await _dbHelper.getHabitEntry(habit.id!, _selectedDate);
-      completions[habit.id!] = entry?.completed ?? false;
+    try {
+      final completions = <int, bool>{};
+      for (final habit in _habits) {
+        if (habit.id != null) {
+          final entry = await _dbHelper.getHabitEntry(habit.id!, _selectedDate);
+          completions[habit.id!] = entry?.completed ?? false;
+        }
+      }
+      setState(() {
+        _habitCompletions = completions;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading habit completions: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
     }
-    setState(() {
-      _habitCompletions = completions;
-    });
   }
 
   Future<void> _toggleHabitCompletion(int habitId) async {
-    final isCompleted = _habitCompletions[habitId] ?? false;
-    final newCompletion = !isCompleted;
-    
-    setState(() {
-      _habitCompletions[habitId] = newCompletion;
-    });
+    try {
+      final isCompleted = _habitCompletions[habitId] ?? false;
+      final newCompletion = !isCompleted;
+      
+      setState(() {
+        _habitCompletions[habitId] = newCompletion;
+      });
 
-    final existingEntry = await _dbHelper.getHabitEntry(habitId, _selectedDate);
-    
-    if (existingEntry != null) {
-      final updatedEntry = existingEntry.copyWith(completed: newCompletion);
-      await _dbHelper.updateHabitEntry(updatedEntry);
-    } else {
-      final newEntry = HabitEntry(
-        habitId: habitId,
-        date: _selectedDate,
-        completed: newCompletion,
-      );
-      await _dbHelper.insertHabitEntry(newEntry);
+      final existingEntry = await _dbHelper.getHabitEntry(habitId, _selectedDate);
+      
+      if (existingEntry != null) {
+        final updatedEntry = existingEntry.copyWith(completed: newCompletion);
+        await _dbHelper.updateHabitEntry(updatedEntry);
+      } else {
+        final newEntry = HabitEntry(
+          habitId: habitId,
+          date: _selectedDate,
+          completed: newCompletion,
+        );
+        await _dbHelper.insertHabitEntry(newEntry);
+      }
+    } catch (e) {
+      // Revert the UI state on error
+      setState(() {
+        _habitCompletions[habitId] = !(_habitCompletions[habitId] ?? false);
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating habit: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
     }
   }
 
   Future<void> _addHabit() async {
-    final result = await Navigator.push<Habit>(
-      context,
-      MaterialPageRoute(builder: (context) => const AddEditHabitScreen()),
-    );
-    
-    if (result != null) {
-      await _dbHelper.insertHabit(result);
-      _loadHabits();
+    try {
+      final result = await Navigator.push<Habit>(
+        context,
+        MaterialPageRoute(builder: (context) => const AddEditHabitScreen()),
+      );
+      
+      if (result != null) {
+        await _dbHelper.insertHabit(result);
+        _loadHabits();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error adding habit: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
     }
   }
 
   Future<void> _editHabit(Habit habit) async {
-    final result = await Navigator.push<Habit>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AddEditHabitScreen(habit: habit),
-      ),
-    );
-    
-    if (result != null) {
-      await _dbHelper.updateHabit(result);
-      _loadHabits();
+    try {
+      final result = await Navigator.push<Habit>(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AddEditHabitScreen(habit: habit),
+        ),
+      );
+      
+      if (result != null) {
+        await _dbHelper.updateHabit(result);
+        _loadHabits();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error editing habit: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
     }
   }
 
@@ -112,8 +175,19 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     if (confirmed == true) {
-      await _dbHelper.deleteHabit(habit.id!);
-      _loadHabits();
+      try {
+        await _dbHelper.deleteHabit(habit.id!);
+        _loadHabits();
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error deleting habit: $e'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -135,15 +209,13 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Habits'),
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
       ),
       body: Column(
         children: [
           // Date Selector
           Container(
             padding: EdgeInsets.all(isTablet ? 20 : 16),
-            color: Colors.deepPurple[50],
+            color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
             child: isTablet
                 ? Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -302,7 +374,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           width: 50,
                                           height: 50,
                                           decoration: BoxDecoration(
-                                            color: isCompleted ? Colors.green : Colors.grey[200],
+                                            color: isCompleted ? Theme.of(context).colorScheme.success : Theme.of(context).colorScheme.surfaceContainerHighest,
                                             borderRadius: BorderRadius.circular(8),
                                           ),
                                           child: Center(
@@ -409,7 +481,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 width: 50,
                                 height: 50,
                                 decoration: BoxDecoration(
-                                  color: isCompleted ? Colors.green : Colors.grey[200],
+                                  color: isCompleted ? Theme.of(context).colorScheme.success : Theme.of(context).colorScheme.surfaceContainerHighest,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Center(
@@ -457,8 +529,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addHabit,
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),
     );

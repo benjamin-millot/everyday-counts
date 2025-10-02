@@ -24,22 +24,33 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Future<void> _loadCompletedHabitsData() async {
-    final Map<DateTime, double> data = {};
-    
-    // Load data for the current month and surrounding months
-    final startDate = DateTime(_focusedDay.year, _focusedDay.month - 1, 1);
-    final endDate = DateTime(_focusedDay.year, _focusedDay.month + 2, 0);
-    
-    for (DateTime date = startDate; date.isBefore(endDate); date = date.add(const Duration(days: 1))) {
-      final percentage = await _dbHelper.getCompletionPercentage(date);
-      if (percentage > 0) {
-        data[date] = percentage;
+    try {
+      final Map<DateTime, double> data = {};
+      
+      // Load data for the current month and surrounding months
+      final startDate = DateTime(_focusedDay.year, _focusedDay.month - 1, 1);
+      final endDate = DateTime(_focusedDay.year, _focusedDay.month + 2, 0);
+      
+      for (DateTime date = startDate; date.isBefore(endDate); date = date.add(const Duration(days: 1))) {
+        final percentage = await _dbHelper.getCompletionPercentage(date);
+        if (percentage > 0) {
+          data[date] = percentage;
+        }
+      }
+      
+      setState(() {
+        _completionPercentages = data;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading calendar data: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
       }
     }
-    
-    setState(() {
-      _completionPercentages = data;
-    });
   }
 
   Widget _getMedalIcon(double completionPercentage) {
@@ -84,8 +95,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Calendar'),
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
       ),
       body: Center(
         child: Container(
@@ -110,16 +119,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
               outsideDaysVisible: false,
               weekendTextStyle: TextStyle(color: Colors.red),
             ),
-            headerStyle: const HeaderStyle(
+            headerStyle: HeaderStyle(
               formatButtonVisible: true,
               titleCentered: true,
               formatButtonShowsNext: false,
               formatButtonDecoration: BoxDecoration(
-                color: Colors.deepPurple,
+                color: Theme.of(context).colorScheme.primary,
                 borderRadius: BorderRadius.all(Radius.circular(12.0)),
               ),
               formatButtonTextStyle: TextStyle(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
             ),
             onDaySelected: (selectedDay, focusedDay) {
@@ -165,9 +174,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   margin: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.deepPurple[50],
+                    color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.deepPurple[200]!),
+                    border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)),
                   ),
                   child: Column(
                     children: [

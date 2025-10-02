@@ -45,7 +45,7 @@ class _AddEditHabitScreenState extends State<AddEditHabitScreen> {
     final isTablet = screenWidth > 600;
     
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: Text(
           widget.habit == null ? 'Add New Habit' : 'Edit Habit',
@@ -54,8 +54,6 @@ class _AddEditHabitScreenState extends State<AddEditHabitScreen> {
             fontSize: 20,
           ),
         ),
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -79,7 +77,7 @@ class _AddEditHabitScreenState extends State<AddEditHabitScreen> {
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Colors.deepPurple[400]!, Colors.deepPurple[600]!],
+                          colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.primary.withValues(alpha: 0.8)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -374,7 +372,7 @@ class _AddEditHabitScreenState extends State<AddEditHabitScreen> {
                       height: 56,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Colors.deepPurple[400]!, Colors.deepPurple[600]!],
+                          colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.primary.withValues(alpha: 0.8)],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                         ),

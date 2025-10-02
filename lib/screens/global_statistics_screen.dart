@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/habit.dart';
 import '../database/database_helper.dart';
+import '../theme/color_extensions.dart';
 
 class GlobalStatisticsScreen extends StatefulWidget {
   const GlobalStatisticsScreen({super.key});
@@ -101,6 +102,15 @@ class _GlobalStatisticsScreenState extends State<GlobalStatisticsScreen> {
       setState(() {
         _isLoading = false;
       });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading statistics: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
     }
   }
 
@@ -118,8 +128,6 @@ class _GlobalStatisticsScreenState extends State<GlobalStatisticsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Statistics'),
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -139,7 +147,7 @@ class _GlobalStatisticsScreenState extends State<GlobalStatisticsScreen> {
                           'Total Habits',
                           '$_totalHabits',
                           Icons.list_alt,
-                          Colors.blue,
+                          Theme.of(context).colorScheme.statsBlue,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -148,7 +156,7 @@ class _GlobalStatisticsScreenState extends State<GlobalStatisticsScreen> {
                           'Total Completions',
                           '$_totalCompletions',
                           Icons.check_circle,
-                          Colors.green,
+                          Theme.of(context).colorScheme.statsGreen,
                         ),
                       ),
                     ],
@@ -163,7 +171,7 @@ class _GlobalStatisticsScreenState extends State<GlobalStatisticsScreen> {
                           'Today',
                           '$_totalCompletionsToday',
                           Icons.today,
-                          Colors.orange,
+                          Theme.of(context).colorScheme.statsOrange,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -172,7 +180,7 @@ class _GlobalStatisticsScreenState extends State<GlobalStatisticsScreen> {
                           'This Week',
                           '$_totalCompletionsThisWeek',
                           Icons.date_range,
-                          Colors.purple,
+                          Theme.of(context).colorScheme.statsPurple,
                         ),
                       ),
                     ],
@@ -187,7 +195,7 @@ class _GlobalStatisticsScreenState extends State<GlobalStatisticsScreen> {
                           'This Month',
                           '$_totalCompletionsThisMonth',
                           Icons.calendar_month,
-                          Colors.teal,
+                          Theme.of(context).colorScheme.statsTeal,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -196,7 +204,7 @@ class _GlobalStatisticsScreenState extends State<GlobalStatisticsScreen> {
                           'Success Rate',
                           '${_overallCompletionRate.toStringAsFixed(1)}%',
                           Icons.trending_up,
-                          Colors.red,
+                          Theme.of(context).colorScheme.statsRed,
                         ),
                       ),
                     ],
@@ -223,21 +231,21 @@ class _GlobalStatisticsScreenState extends State<GlobalStatisticsScreen> {
                             'Today\'s Progress',
                             _totalCompletionsToday,
                             _totalHabits,
-                            Colors.orange,
+                            Theme.of(context).colorScheme.statsOrange,
                           ),
                           const SizedBox(height: 16),
                           _buildProgressBar(
                             'This Week\'s Progress',
                             _totalCompletionsThisWeek,
                             _totalHabits * 7,
-                            Colors.purple,
+                            Theme.of(context).colorScheme.statsPurple,
                           ),
                           const SizedBox(height: 16),
                           _buildProgressBar(
                             'This Month\'s Progress',
                             _totalCompletionsThisMonth,
                             _totalHabits * 30,
-                            Colors.teal,
+                            Theme.of(context).colorScheme.statsTeal,
                           ),
                         ],
                       ),
