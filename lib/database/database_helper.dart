@@ -49,99 +49,139 @@ class DatabaseHelper {
 
   // Habit CRUD operations
   Future<int> insertHabit(Habit habit) async {
-    final db = await database;
-    return await db.insert('habits', habit.toMap());
+    try {
+      final db = await database;
+      return await db.insert('habits', habit.toMap());
+    } catch (e) {
+      throw Exception('Failed to insert habit: $e');
+    }
   }
 
   Future<List<Habit>> getAllHabits() async {
-    final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('habits');
-    return List.generate(maps.length, (i) => Habit.fromMap(maps[i]));
+    try {
+      final db = await database;
+      final List<Map<String, dynamic>> maps = await db.query('habits');
+      return List.generate(maps.length, (i) => Habit.fromMap(maps[i]));
+    } catch (e) {
+      throw Exception('Failed to get all habits: $e');
+    }
   }
 
   Future<Habit?> getHabit(int id) async {
-    final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'habits',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-    if (maps.isNotEmpty) {
-      return Habit.fromMap(maps.first);
+    try {
+      final db = await database;
+      final List<Map<String, dynamic>> maps = await db.query(
+        'habits',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      if (maps.isNotEmpty) {
+        return Habit.fromMap(maps.first);
+      }
+      return null;
+    } catch (e) {
+      throw Exception('Failed to get habit: $e');
     }
-    return null;
   }
 
   Future<int> updateHabit(Habit habit) async {
-    final db = await database;
-    return await db.update(
-      'habits',
-      habit.toMap(),
-      where: 'id = ?',
-      whereArgs: [habit.id],
-    );
+    try {
+      final db = await database;
+      return await db.update(
+        'habits',
+        habit.toMap(),
+        where: 'id = ?',
+        whereArgs: [habit.id],
+      );
+    } catch (e) {
+      throw Exception('Failed to update habit: $e');
+    }
   }
 
   Future<int> deleteHabit(int id) async {
-    final db = await database;
-    return await db.delete(
-      'habits',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    try {
+      final db = await database;
+      return await db.delete(
+        'habits',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    } catch (e) {
+      throw Exception('Failed to delete habit: $e');
+    }
   }
 
   // HabitEntry CRUD operations
   Future<int> insertHabitEntry(HabitEntry entry) async {
-    final db = await database;
-    return await db.insert('habit_entries', entry.toMap());
+    try {
+      final db = await database;
+      return await db.insert('habit_entries', entry.toMap());
+    } catch (e) {
+      throw Exception('Failed to insert habit entry: $e');
+    }
   }
 
   Future<List<HabitEntry>> getHabitEntries(int habitId) async {
-    final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'habit_entries',
-      where: 'habit_id = ?',
-      whereArgs: [habitId],
-      orderBy: 'date DESC',
-    );
-    return List.generate(maps.length, (i) => HabitEntry.fromMap(maps[i]));
+    try {
+      final db = await database;
+      final List<Map<String, dynamic>> maps = await db.query(
+        'habit_entries',
+        where: 'habit_id = ?',
+        whereArgs: [habitId],
+        orderBy: 'date DESC',
+      );
+      return List.generate(maps.length, (i) => HabitEntry.fromMap(maps[i]));
+    } catch (e) {
+      throw Exception('Failed to get habit entries: $e');
+    }
   }
 
   Future<HabitEntry?> getHabitEntry(int habitId, DateTime date) async {
-    final db = await database;
-    final startOfDay = DateTime(date.year, date.month, date.day);
-    final endOfDay = startOfDay.add(const Duration(days: 1));
-    
-    final List<Map<String, dynamic>> maps = await db.query(
-      'habit_entries',
-      where: 'habit_id = ? AND date >= ? AND date < ?',
-      whereArgs: [habitId, startOfDay.millisecondsSinceEpoch, endOfDay.millisecondsSinceEpoch],
-    );
-    
-    if (maps.isNotEmpty) {
-      return HabitEntry.fromMap(maps.first);
+    try {
+      final db = await database;
+      final startOfDay = DateTime(date.year, date.month, date.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+      
+      final List<Map<String, dynamic>> maps = await db.query(
+        'habit_entries',
+        where: 'habit_id = ? AND date >= ? AND date < ?',
+        whereArgs: [habitId, startOfDay.millisecondsSinceEpoch, endOfDay.millisecondsSinceEpoch],
+      );
+      
+      if (maps.isNotEmpty) {
+        return HabitEntry.fromMap(maps.first);
+      }
+      return null;
+    } catch (e) {
+      throw Exception('Failed to get habit entry: $e');
     }
-    return null;
   }
 
   Future<int> updateHabitEntry(HabitEntry entry) async {
-    final db = await database;
-    return await db.update(
-      'habit_entries',
-      entry.toMap(),
-      where: 'id = ?',
-      whereArgs: [entry.id],
-    );
+    try {
+      final db = await database;
+      return await db.update(
+        'habit_entries',
+        entry.toMap(),
+        where: 'id = ?',
+        whereArgs: [entry.id],
+      );
+    } catch (e) {
+      throw Exception('Failed to update habit entry: $e');
+    }
   }
 
   Future<int> deleteHabitEntry(int id) async {
-    final db = await database;
-    return await db.delete(
-      'habit_entries',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    try {
+      final db = await database;
+      return await db.delete(
+        'habit_entries',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    } catch (e) {
+      throw Exception('Failed to delete habit entry: $e');
+    }
   }
 
   // Statistics methods
