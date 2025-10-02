@@ -32,7 +32,8 @@ class HabitDataProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   
   bool isHabitCompleted(int habitId, DateTime date) {
-    return _habitCompletions[habitId]?[date] ?? false;
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+    return _habitCompletions[habitId]?[normalizedDate] ?? false;
   }
   
   int getStreak(int habitId) {
@@ -83,7 +84,8 @@ class HabitDataProvider extends ChangeNotifier {
       
       for (final entry in entries) {
         if (entry.date.isAfter(startDate.subtract(const Duration(days: 1)))) {
-          _habitCompletions[habit.id!]![entry.date] = entry.completed;
+          final normalizedDate = DateTime(entry.date.year, entry.date.month, entry.date.day);
+          _habitCompletions[habit.id!]![normalizedDate] = entry.completed;
         }
       }
     }
@@ -153,7 +155,8 @@ class HabitDataProvider extends ChangeNotifier {
       
       // Update local state immediately for responsiveness
       _habitCompletions[habitId] ??= {};
-      _habitCompletions[habitId]![date] = newCompletion;
+      final normalizedDate = DateTime(date.year, date.month, date.day);
+      _habitCompletions[habitId]![normalizedDate] = newCompletion;
       
       // Update database
       final existingEntry = await _dbHelper.getHabitEntry(habitId, date);
@@ -175,7 +178,8 @@ class HabitDataProvider extends ChangeNotifier {
       
     } catch (e) {
       // Revert local state on error
-      _habitCompletions[habitId]![date] = !(_habitCompletions[habitId]![date] ?? false);
+      final normalizedDate = DateTime(date.year, date.month, date.day);
+      _habitCompletions[habitId]![normalizedDate] = !(_habitCompletions[habitId]![normalizedDate] ?? false);
       debugPrint('Error toggling habit completion: $e');
       rethrow;
     } finally {
