@@ -12,6 +12,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _resetAllData() async {
+    final habitProvider = Provider.of<HabitDataProvider>(context, listen: false);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -37,7 +38,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (confirmed == true) {
       try {
-        final habitProvider = Provider.of<HabitDataProvider>(context, listen: false);
         await habitProvider.resetAllData();
         
         if (mounted) {

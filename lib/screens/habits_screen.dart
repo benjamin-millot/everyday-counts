@@ -190,6 +190,7 @@ class _HabitsScreenState extends State<HabitsScreen> {
 
   Future<void> _addHabit() async {
     try {
+      final habitProvider = Provider.of<HabitDataProvider>(context, listen: false);
       final result = await Navigator.push<Habit>(
         context,
         MaterialPageRoute(
@@ -198,7 +199,6 @@ class _HabitsScreenState extends State<HabitsScreen> {
       );
 
       if (result != null) {
-        final habitProvider = Provider.of<HabitDataProvider>(context, listen: false);
         await habitProvider.addHabit(result);
         
         if (mounted) {
@@ -224,6 +224,7 @@ class _HabitsScreenState extends State<HabitsScreen> {
 
   Future<void> _editHabit(Habit habit) async {
     try {
+      final habitProvider = Provider.of<HabitDataProvider>(context, listen: false);
       final result = await Navigator.push<Habit>(
         context,
         MaterialPageRoute(
@@ -232,7 +233,6 @@ class _HabitsScreenState extends State<HabitsScreen> {
       );
 
       if (result != null) {
-        final habitProvider = Provider.of<HabitDataProvider>(context, listen: false);
         await habitProvider.updateHabit(result);
         
         if (mounted) {

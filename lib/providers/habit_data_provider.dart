@@ -8,18 +8,18 @@ class HabitDataProvider extends ChangeNotifier {
   
   // Core data
   List<Habit> _habits = [];
-  Map<int, Map<DateTime, bool>> _habitCompletions = {};
+  final Map<int, Map<DateTime, bool>> _habitCompletions = {};
   DateTime _selectedDate = DateTime.now();
   
   // Computed data
-  Map<int, int> _streaks = {};
-  Map<int, int> _bestStreaks = {};
-  Map<int, double> _completionRates = {};
-  Map<DateTime, double> _dailyCompletionPercentages = {};
+  final Map<int, int> _streaks = {};
+  final Map<int, int> _bestStreaks = {};
+  final Map<int, double> _completionRates = {};
+  final Map<DateTime, double> _dailyCompletionPercentages = {};
   
   // Loading states
   bool _isLoading = false;
-  Map<int, bool> _habitLoadingStates = {};
+  final Map<int, bool> _habitLoadingStates = {};
 
   // Getters
   List<Habit> get habits => _habits;
