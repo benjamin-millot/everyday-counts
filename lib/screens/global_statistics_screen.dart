@@ -117,7 +117,7 @@ class _GlobalStatisticsScreenState extends State<GlobalStatisticsScreen> {
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Global Statistics'),
+        title: const Text('Statistics'),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
       ),

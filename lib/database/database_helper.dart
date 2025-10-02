@@ -317,4 +317,13 @@ class DatabaseHelper {
     
     return Sqflite.firstIntValue(result) ?? 0;
   }
+
+  // Reset all data (delete all habits and entries)
+  Future<void> resetAllData() async {
+    final db = await database;
+    await db.transaction((txn) async {
+      await txn.delete('habit_entries');
+      await txn.delete('habits');
+    });
+  }
 }

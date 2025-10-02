@@ -11,7 +11,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Everyday Counts',
+      title: 'Everday Counts',
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
         useMaterial3: true,

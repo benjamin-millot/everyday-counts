@@ -134,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Everyday Counts'),
+        title: const Text('Habits'),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
       ),

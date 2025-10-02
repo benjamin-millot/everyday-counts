@@ -8,3 +8,4 @@ Create an application called Everday Counts in dart and flutter.
 - A global statistics page is also available.
 - The application main target is Android, but it should be compatible with iOS and web. Maitaining responsive design is a must.
 - For the Habit page, the Calendar page and the Statistics, use a NavigationBar.
+- Add a page called Settings. It can be reached from the NavigationBar. There is an option to reset the saved data if the user is sure.
